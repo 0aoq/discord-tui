@@ -298,7 +298,7 @@ const renderMessage = (line: string) => {
         if (selectedLines.includes(item)) {
             item.style.bg = 'white'
             item.style.fg = 'black'
-            item.setHover('Message selected:\nShift+D - Delete\nShift+E - Edit')
+            item.setHover('Message selected:\nShift+D - Delete\nShift+E - Edit\nShift+F - View Full')
 
             // unselect all others
             for (let _item of selectedLines) {
@@ -345,6 +345,18 @@ const renderMessage = (line: string) => {
         messageStream.clearItems()
         messageStream.addItem(`{center}--- EDITING MESSAGE {bold}${message.id}{/bold} ---{/center}`)
 
+        app.render()
+    })
+
+    // view full message
+    app.key('S-f', () => {
+        if (!selectedLines.includes(item)) return
+
+        messageStream.setContent('')
+        item.removeHover()
+        messageStream.clearItems()
+        messageStream.setContent(`${content.replaceAll(' [\\n] ', '\n')}\n\n{center}{gray-fg}End of message ⎯  Re-open channel to return{/gray-fg}{/center}`)
+        currentChannelId = "0" // prevent app from reloading messages
         app.render()
     })
 }
@@ -400,7 +412,7 @@ const renderChannelMessages = async (channelId: string, limit = 100) => {
 
     const messages = await request.json()
     discord.pushToHTTPLog(JSON.stringify(messages))
-    
+
     let streamData = ''
 
     if (messages.message) {
@@ -414,7 +426,7 @@ const renderChannelMessages = async (channelId: string, limit = 100) => {
 
     for (let message of messages) {
         currentContentStore[message.id] = { sender: message.author.username, text: message.content }
-        streamData = `[{bold}${message.author.username}{/bold}] : ${message.content}!!META:${JSON.stringify(message)}\n ${streamData}`
+        streamData = `[{bold}${message.author.username}{/bold}] : ${message.content.replaceAll('\n', ' [\\n] ')}!!META:${JSON.stringify(message)}\n ${streamData}`
     }
 
     createTextStream(streamData)
