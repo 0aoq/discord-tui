@@ -1,0 +1,16 @@
+{
+  "name": "discord-tui",
+  "description": "A modern Discord terminal-based client, written in JavaScript.",
+  "author": {
+    "name": "0aoq",
+    "email": "hkau@oxvs.net"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "neo-blessed": "^0.2.0",
+    "websocket": "^1.0.34"
+  },
+  "scripts": {
+    "ui": "node --no-warnings package/index.js"
+  }
+}
