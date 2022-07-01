@@ -123,6 +123,23 @@ const titleBarOptions = [
             fg: 'white',
             hover: { bg: 'white' }
         }
+    }),
+    // http log
+    blessed.text({
+        parent: titleBar,
+        width: '10%',
+        left: '20%', // position after previous element; equal to the width of all previous items
+        tags: true,
+        scrollable: true,
+        inputOnFocus: true,
+        autoPadding: true,
+        mouse: true,
+        align: 'center',
+        content: 'HTTP Log',
+        style: {
+            fg: 'white',
+            hover: { bg: 'white' }
+        }
     })
 ]
 
@@ -382,6 +399,8 @@ const renderChannelMessages = async (channelId: string, limit = 100) => {
     })
 
     const messages = await request.json()
+    discord.pushToHTTPLog(JSON.stringify(messages))
+    
     let streamData = ''
 
     if (messages.message) {
@@ -419,6 +438,8 @@ const renderGuildChannels = async (props: { guildId: string, userPermission: str
 
     const allowedTypes = [0, 1, 3, 4, 5]
     let channelList = await request.json()
+    discord.pushToHTTPLog(JSON.stringify(channelList))
+
     let categories = {}
 
     function sortChannels(a, b) {
@@ -525,6 +546,8 @@ const renderUserGuilds = async () => {
 
     const request = await discord.getUserGuilds({ authToken: config.authToken })
     const guildList = await request.json()
+
+    discord.pushToHTTPLog(JSON.stringify(guildList))
 
     for (let guild of guildList) {
         let myProfile
@@ -634,6 +657,33 @@ titleBarOptions[1].on('click', () => {
     topDropDownMenu.setLabel('Socket Log')
 
     for (let item of socketLog) {
+        const _item = topDropDownMenu.addItem(item)
+
+        _item.on('mouseover', () => { _item.style.bg = 'white'; app.render() })
+        _item.on('mouseout', () => { _item.style.bg = ''; app.render() })
+
+        _item.on('click', () => {
+            // close dropdown and render
+            topDropDownMenu.toggle()
+            messageStream.setContent('')
+            messageStream.clearItems()
+
+            postSystemMessage(item)
+            app.render()
+        })
+    }
+
+    // finish
+    topDropDownMenu.toggle()
+    app.render()
+})
+
+// handle HTTP log
+titleBarOptions[2].on('click', () => {
+    topDropDownMenu.clearItems()
+    topDropDownMenu.setLabel('HTTP Log')
+
+    for (let item of discord.httpLog) {
         const _item = topDropDownMenu.addItem(item)
 
         _item.on('mouseover', () => { _item.style.bg = 'white'; app.render() })

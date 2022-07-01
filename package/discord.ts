@@ -6,6 +6,9 @@
  * @license  MIT
  */
 
+export const httpLog = []
+export const pushToHTTPLog = (data: any) => { httpLog.push(data) }
+
 ///////////////////////////////////////////////////////////////////////
 // Message events
 
@@ -19,6 +22,7 @@
  * @param {string} props.body The request body
  */
 export const sendMessage = (props: { contentType: string, channelId: string, authToken: string, body: string }) => {
+    httpLog.push(`https://discord.com/api/v9/channels/${props.channelId}/messages`)
     return fetch(`https://discord.com/api/v9/channels/${props.channelId}/messages`, {
         "credentials": "include",
         "headers": {
@@ -49,6 +53,7 @@ export const sendMessage = (props: { contentType: string, channelId: string, aut
  * @param {string} props.authToken The user authorization token
  */
 export const deleteMessage = (props: { channelId: string, authToken: string, messageId: string }) => {
+    httpLog.push(`https://discord.com/api/v9/channels/${props.channelId}/messages/${props.messageId}`)
     return fetch(`https://discord.com/api/v9/channels/${props.channelId}/messages/${props.messageId}`, {
         "headers": {
             "accept": "*/*",
@@ -80,6 +85,7 @@ export const getMessages = (props: { channelId: string, authToken: string, limit
     let before_statement = ""
     if (props.before !== null && props.before !== undefined) before_statement = `&before=${props.before}`
 
+    httpLog.push(`https://discord.com/api/v9/channels/${props.channelId}/messages?limit=${props.limit}${before_statement}`)
     return fetch(`https://discord.com/api/v9/channels/${props.channelId}/messages?limit=${props.limit}${before_statement}`, {
         "headers": {
             "accept": "*/*",
@@ -107,6 +113,7 @@ export const getMessages = (props: { channelId: string, authToken: string, limit
  * @param {string} props.authToken The user authorization token
  */
 export const getMessage = (props: { channelId: string, messageId: string, authToken: string }) => {
+    httpLog.push(`https://discord.com/api/v9/channels/${props.channelId}/messages/${props.messageId}`)
     return fetch(`https://discord.com/api/v9/channels/${props.channelId}/messages/${props.messageId}`, {
         "headers": {
             "accept": "*/*",
@@ -136,6 +143,7 @@ export const getMessage = (props: { channelId: string, messageId: string, authTo
  * @param {string} props.guildId The Discord server ID
  */
 export const getChannels = (props: { authToken: string, guildId: string }) => {
+    httpLog.push(`https://discord.com/api/v9/guilds/${props.guildId}/channels`)
     return fetch(`https://discord.com/api/v9/guilds/${props.guildId}/channels`, {
         "headers": {
             "accept": "*/*",
@@ -162,6 +170,7 @@ export const getChannels = (props: { authToken: string, guildId: string }) => {
  * @param {string} props.guildId The Discord server ID
  */
 export const getGuild = (props: { authToken: string, guildId: string }) => {
+    httpLog.push(`https://discord.com/api/v9/guilds/${props.guildId}?with_counts=true`)
     return fetch(`https://discord.com/api/v9/guilds/${props.guildId}?with_counts=true`, {
         "headers": {
             "accept": "*/*",
@@ -191,6 +200,7 @@ export const getGuild = (props: { authToken: string, guildId: string }) => {
  * @param {string} props.guildId The Discord server ID
  */
 export const getCurrentUserInGuild = (props: { authToken: string, guildId: string }) => {
+    httpLog.push(`https://discord.com/api/v9/users/@me/guilds/${props.guildId}/member`)
     return fetch(`https://discord.com/api/v9/users/@me/guilds/${props.guildId}/member`, {
         "headers": {
             "accept": "*/*",
@@ -218,6 +228,7 @@ export const getCurrentUserInGuild = (props: { authToken: string, guildId: strin
  * @param {string} props.body The request body
  */
 export const updateUserSettings = (props: { authToken: string, body: string }) => {
+    httpLog.push("https://discord.com/api/v9/users/@me/settings")
     return fetch("https://discord.com/api/v9/users/@me/settings", {
         "headers": {
             "accept": "*/*",
@@ -244,6 +255,7 @@ export const updateUserSettings = (props: { authToken: string, body: string }) =
  * @param {string} props.authToken The user authorization token
  */
 export const getUserGuilds = (props: { authToken: string }) => {
+    httpLog.push("https://discord.com/api/v9/users/@me/guilds")
     return fetch("https://discord.com/api/v9/users/@me/guilds", {
         "headers": {
             "accept": "*/*",
@@ -270,6 +282,7 @@ export const getUserGuilds = (props: { authToken: string }) => {
  * @param {string} props.authToken The user authorization token
  */
 export const getMe = (props: { authToken: string }) => {
+    httpLog.push("https://discord.com/api/v9/users/@me")
     return fetch("https://discord.com/api/v9/users/@me", {
         "headers": {
             "accept": "*/*",
@@ -303,5 +316,8 @@ export default {
     getCurrentUserInGuild,
     updateUserSettings,
     getUserGuilds,
-    getMe
+    getMe,
+
+    httpLog,
+    pushToHTTPLog
 }
