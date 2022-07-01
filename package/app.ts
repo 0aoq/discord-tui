@@ -479,6 +479,12 @@ const renderGuildChannels = async (props: { guildId: string, userPermission: str
         app.render()
     }
 
+    // load channels
+    channels.clearItems()
+
+    const loadingText = channels.addItem('Loading...')
+    app.render()
+
     for (let channel of channelList) {
         if (!allowedTypes.includes(channel.type)) continue // channel must be text
 
@@ -494,6 +500,7 @@ const renderGuildChannels = async (props: { guildId: string, userPermission: str
 
             const messages = await canReadRequest.json()
             if (typeof messages[0] !== 'object') continue // we don't have permission
+            allowedChannelIds.push(channel.id)
 
             // let deny = false
 
@@ -534,6 +541,9 @@ const renderGuildChannels = async (props: { guildId: string, userPermission: str
             createItem(channel)
         }
     })
+
+    loadingText.destroy()
+    app.render()
 }
 
 let userGuildProfiles = {}
