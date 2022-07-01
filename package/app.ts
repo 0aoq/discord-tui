@@ -1,8 +1,10 @@
 // const config = require('../bot.config.json')
-const discord = require('./discord')
+import * as discord from './discord'
 
-const blessed = require('neo-blessed')
-const WebSockets = require('websocket')
+import * as blessed from 'neo-blessed'
+import * as WebSockets from 'websocket'
+
+import * as fs from 'fs'
 
 let currentChannelId = "0"
 let currentContentStore = {}
@@ -432,6 +434,8 @@ const renderChannelMessages = async (channelId: string, limit = 100) => {
     createTextStream(streamData)
 }
 
+let categories = {}
+
 /**
  * @function renderGuildChannels
  * 
@@ -451,8 +455,6 @@ const renderGuildChannels = async (props: { guildId: string, userPermission: str
     const allowedTypes = [0, 1, 3, 4, 5]
     let channelList = await request.json()
     discord.pushToHTTPLog(JSON.stringify(channelList))
-
-    let categories = {}
 
     function sortChannels(a, b) {
         return a.position - b.position
@@ -664,6 +666,27 @@ titleBarOptions[0].on('click', () => {
     createDropDownItem('Reset Channels', () => {
         topDropDownMenu.toggle()
         allowedChannelIds = []
+    })
+
+    createDropDownItem('Save Data', async () => {
+        topDropDownMenu.toggle()
+
+        await fs.writeFileSync(`${process.cwd()}/clientdata.json`, JSON.stringify({
+            currentContentStore: currentContentStore,
+            allowedChannelIds: allowedChannelIds,
+            currentChannelId: currentChannelId,
+            savedCategories: categories,
+            // allMessages: allMessages,
+            HTTPLog: discord.httpLog,
+            socketLog: socketLog,
+            config: config
+        }))
+
+        topDropDownMenu.toggle()
+        messageStream.setContent('')
+        messageStream.clearItems()
+
+        postSystemMessage(`Saved current client state to: ${process.cwd()}/clientdata.json`)
     })
 
     // finish

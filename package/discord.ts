@@ -81,7 +81,7 @@ export const deleteMessage = (props: { channelId: string, authToken: string, mes
  * @param {number} props.limit The maximum amount of messages to return (1 - 100)
  * @param {number} props.before Get all messages before specified id
  */
-export const getMessages = (props: { channelId: string, authToken: string, limit: string, before: string }) => {
+export const getMessages = (props: { channelId: string, authToken: string, limit: number, before?: string }) => {
     let before_statement = ""
     if (props.before !== null && props.before !== undefined) before_statement = `&before=${props.before}`
 
