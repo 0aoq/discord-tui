@@ -1,1 +1,5 @@
 node_modules/
+
+# build files
+package/*.js
+package/*.d.ts
