@@ -5,6 +5,12 @@ import * as path from 'path'
 import * as app from './app'
 import * as fs from 'fs'
 
+// create config directories
+if (!fs.existsSync(`${__dirname}/config`)) fs.mkdirSync(`${__dirname}/config`)
+if (!fs.existsSync(`${__dirname}/config/app.config.json`)) fs.writeFileSync(`${__dirname}/config/app.config.json`, `{"users":{}}`)
+if (!fs.existsSync(`${__dirname}/config/auth.config.json`)) fs.writeFileSync(`${__dirname}/config/auth.config.json`, `{"authToken":""}`)
+
+// create screen
 let login_screen = blessed.screen({
     smartCSR: true
 })
@@ -67,11 +73,15 @@ const createContainerItem = (text, onclick) => {
 // Login
 
 (async () => {
-    const config = await fs.readFileSync(path.resolve(__dirname, 'config', 'auth.config.json'))
-    // @ts-ignore
-    const json = JSON.parse(config)
+    const authconfig = await fs.readFileSync(path.resolve(__dirname, 'config', 'auth.config.json'))
+    const appconfig = await fs.readFileSync(path.resolve(__dirname, 'config', 'app.config.json'))
 
-    if (json.authToken === null || json.authToken === undefined || json.authToken === '') {
+    // @ts-ignore
+    const authjson = JSON.parse(authconfig)
+    // @ts-ignore
+    const appjson = JSON.parse(appconfig)
+
+    if (authjson.authToken === null || authjson.authToken === undefined || authjson.authToken === '') {
         let foundString = null
         // let token = null
 
@@ -96,10 +106,6 @@ found:`)
 
             input.key('enter', async () => {
                 if (foundString/* && input.getValue().split('token:')[1] */) {
-                    fs.writeFileSync(path.resolve(__dirname, 'config', 'auth.config.json'), JSON.stringify({
-                        authToken: ''
-                    }))                    
-
                     // save to file
                     //json.authToken = token
 
@@ -108,6 +114,7 @@ found:`)
                     //app.addConfigKey('authToken', token)
                     //app.loadMainApp()
                     //app.loadSocketConnection()
+                    process.exit(0)
                 } else if (!foundString && input.getValue().split('found:')[1]) {
                     // continue to password
                     foundString = input.getValue().split('found:')[1].split('\n')[0]
@@ -127,7 +134,12 @@ found:`)
     } else {
         container.destroy()
         login_screen.destroy()
-        app.addConfigKey('authToken', json.authToken)
+
+        // add config
+        app.addConfigKey('authToken', authjson.authToken)
+        app.addConfigKey('custom_user_options', appjson.users)
+        
+        // load app
         app.loadMainApp()
         app.loadSocketConnection()
     }

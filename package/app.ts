@@ -259,15 +259,15 @@ const renderMessage = (line: string) => {
     // render attachment (link)
     if (message.content === '' && message.attachments && message.attachments[0]) {
         // if there is no text, but there is an attachment ... show that
-        content = ` [{bold}${message.author.username}{/bold}] : ${message.attachments[0].url}`
+        content = ` [{bold}${message.author.username}{/bold}]: ${message.attachments[0].url}`
     } else if (message.content !== '' && message.attachments && message.attachments[0]) {
-        content = ` [{bold}${message.author.username}{/bold}] : ${message.content} {gray-fg}${message.attachments[0].url}{/gray-fg}`
+        content = ` [{bold}${message.author.username}{/bold}]: ${message.content} {gray-fg}${message.attachments[0].url}{/gray-fg}`
     }
 
     // render reference message
     if (message.referenced_message) {
         const refmsg = message.referenced_message
-        const item = messageStream.addItem(`{gray-fg}┌╴[${refmsg.author.username}] : ${refmsg.content}{/gray-fg}`)
+        const item = messageStream.addItem(`{gray-fg}┌╴[${refmsg.author.username}]: ${refmsg.content}{/gray-fg}`)
         content = `{gray-fg}└╴{/gray-fg}${content.slice(1)}` // make the boxes connect
 
         item.on('click', () => {
@@ -286,6 +286,14 @@ const renderMessage = (line: string) => {
 
         app.render()
     } else content = ` ${content}`
+
+    // render special tag
+    if (config.custom_user_options[message.author.id] && config.custom_user_options[message.author.id].tag) {
+        const tagName = config.custom_user_options[message.author.id].tag.name
+        const tagColor = config.custom_user_options[message.author.id].tag.color
+
+        if (tagName && tagColor) content = `  {${tagColor}-fg}[${tagName}]{/${tagColor}-fg}${content.slice(1)}`
+    }
 
     // render source message
     if (!content.startsWith(' ') && !content.startsWith('{gray-fg}└')) content = ` ${content}`
@@ -334,7 +342,7 @@ const renderMessage = (line: string) => {
         })
 
         delete selectedLines[selectedLines.indexOf(item)]
-        renderChannelMessages(currentChannelId)
+        // renderChannelMessages(currentChannelId) // WILL BE DONE AUTOMATICALLY BY SOCKET
     })
 
     // edit message
@@ -383,7 +391,7 @@ export const createTextStream = (data: string) => {
 }
 
 export const postSystemMessage = (message: string) => {
-    messageStream.setContent(messageStream.getContent() + `[{bold}System{/bold}] : ${message}\n`)
+    messageStream.setContent(messageStream.getContent() + `[{bold}System{/bold}]: ${message}\n`)
     app.render()
 }
 
@@ -421,14 +429,14 @@ const renderChannelMessages = async (channelId: string, limit = 100) => {
         messageStream.setContent('')
         messageStream.clearItems()
 
-        postSystemMessage(`${messages.message} : ${JSON.stringify(messages)}`)
+        postSystemMessage(`${messages.message}: ${JSON.stringify(messages)}`)
         app.render()
         return "RATE_LIMIT_REACHED"
     }
 
     for (let message of messages) {
         currentContentStore[message.id] = { sender: message.author.username, text: message.content }
-        streamData = `[{bold}${message.author.username}{/bold}] : ${message.content.replaceAll('\n', ' [\\n] ')}!!META:${JSON.stringify(message)}\n ${streamData}`
+        streamData = `[{bold}${message.author.username}{/bold}]: ${message.content.replaceAll('\n', ' [\\n] ')}!!META:${JSON.stringify(message)}\n ${streamData}`
     }
 
     createTextStream(streamData)
@@ -589,7 +597,7 @@ const renderUserGuilds = async () => {
                     messageStream.setContent('')
                     messageStream.clearItems()
 
-                    postSystemMessage(`${_myProfile.message} : ${JSON.stringify(_myProfile)}`)
+                    postSystemMessage(`${_myProfile.message}: ${JSON.stringify(_myProfile)}`)
                     app.render()
                     return "RATE_LIMIT_REACHED"
                 }
@@ -817,8 +825,7 @@ export const loadSocketConnection = () => {
                         renderChannelMessages(data.d.channel_id, 15) // we also don't need as many messages this time because we're focusing on this one section
                     }
                 } else if (data.t === "MESSAGE_DELETE") {
-                    // check if this message exists in the store
-                    if (currentContentStore[data.d.id] && currentChannelId === data.d.channel_id) {
+                    if (currentChannelId === data.d.channel_id) {
                         // if it does, find that message in the stream and add (deleted) to the end of the message
                         // nevermind the comment above, just re-render
                         renderChannelMessages(data.d.channel_id, 15)
