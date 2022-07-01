@@ -1,25 +1,24 @@
-"use strict";
 /**
  * @file Handle requests to the Discord API
  * @name discord.js
- *
+ * 
  * @author 0aoq <hkau@oxvs.net>
  * @license  MIT
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMe = exports.getUserGuilds = exports.updateUserSettings = exports.getCurrentUserInGuild = exports.getGuild = exports.getChannels = exports.getMessage = exports.getMessages = exports.deleteMessage = exports.sendMessage = void 0;
+
 ///////////////////////////////////////////////////////////////////////
 // Message events
+
 /**
  * @function discord.sendMessage
- *
+ * 
  * @param {object} props
  * @param {string} props.contentType The exact content-type header for the request
  * @param {string} props.channelId The Discord channel ID
  * @param {string} props.authToken The user authorization token
  * @param {string} props.body The request body
  */
-const sendMessage = (props) => {
+export const sendMessage = (props: { contentType: string, channelId: string, authToken: string, body: string }) => {
     return fetch(`https://discord.com/api/v9/channels/${props.channelId}/messages`, {
         "credentials": "include",
         "headers": {
@@ -38,18 +37,18 @@ const sendMessage = (props) => {
         "body": props.body,
         "method": "POST",
         "mode": "cors"
-    });
-};
-exports.sendMessage = sendMessage;
+    })
+}
+
 /**
  * @function discord.deleteMessage
- *
+ * 
  * @param {object} props
  * @param {string} props.channelId The Discord channel ID
  * @param {string} props.messageId The Discord message ID
  * @param {string} props.authToken The user authorization token
  */
-const deleteMessage = (props) => {
+export const deleteMessage = (props: { channelId: string, authToken: string, messageId: string }) => {
     return fetch(`https://discord.com/api/v9/channels/${props.channelId}/messages/${props.messageId}`, {
         "headers": {
             "accept": "*/*",
@@ -65,22 +64,22 @@ const deleteMessage = (props) => {
         "body": null,
         "method": "DELETE",
         "mode": "cors"
-    });
-};
-exports.deleteMessage = deleteMessage;
+    })
+}
+
 /**
  * @function discord.getMessages
- *
+ * 
  * @param {object} props
  * @param {string} props.channelId The Discord channel ID
  * @param {string} props.authToken The user authorization token
  * @param {number} props.limit The maximum amount of messages to return (1 - 100)
  * @param {number} props.before Get all messages before specified id
  */
-const getMessages = (props) => {
-    let before_statement = "";
-    if (props.before !== null && props.before !== undefined)
-        before_statement = `&before=${props.before}`;
+export const getMessages = (props: { channelId: string, authToken: string, limit: string, before: string }) => {
+    let before_statement = ""
+    if (props.before !== null && props.before !== undefined) before_statement = `&before=${props.before}`
+
     return fetch(`https://discord.com/api/v9/channels/${props.channelId}/messages?limit=${props.limit}${before_statement}`, {
         "headers": {
             "accept": "*/*",
@@ -96,18 +95,18 @@ const getMessages = (props) => {
         "body": null,
         "method": "GET",
         "mode": "cors"
-    });
-};
-exports.getMessages = getMessages;
+    })
+}
+
 /**
  * @function discord.getMessage
- *
+ * 
  * @param {object} props
  * @param {string} props.channelId The Discord channel ID
  * @param {string} props.messageId The Discord message ID
  * @param {string} props.authToken The user authorization token
  */
-const getMessage = (props) => {
+export const getMessage = (props: { channelId: string, messageId: string, authToken: string }) => {
     return fetch(`https://discord.com/api/v9/channels/${props.channelId}/messages/${props.messageId}`, {
         "headers": {
             "accept": "*/*",
@@ -123,19 +122,20 @@ const getMessage = (props) => {
         "body": null,
         "method": "GET",
         "mode": "cors"
-    });
-};
-exports.getMessage = getMessage;
+    })
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Guild Requests
+
 /**
  * @function discord.getChannels
- *
+ * 
  * @param {object} props
  * @param {string} props.authToken The user authorization token
  * @param {string} props.guildId The Discord server ID
  */
-const getChannels = (props) => {
+export const getChannels = (props: { authToken: string, guildId: string }) => {
     return fetch(`https://discord.com/api/v9/guilds/${props.guildId}/channels`, {
         "headers": {
             "accept": "*/*",
@@ -151,17 +151,17 @@ const getChannels = (props) => {
         "body": null,
         "method": "GET",
         "mode": "cors"
-    });
-};
-exports.getChannels = getChannels;
+    })
+}
+
 /**
  * @function discord.getGuild
- *
+ * 
  * @param {object} props
  * @param {string} props.authToken The user authorization token
  * @param {string} props.guildId The Discord server ID
  */
-const getGuild = (props) => {
+export const getGuild = (props: { authToken: string, guildId: string }) => {
     return fetch(`https://discord.com/api/v9/guilds/${props.guildId}?with_counts=true`, {
         "headers": {
             "accept": "*/*",
@@ -177,19 +177,20 @@ const getGuild = (props) => {
         "body": null,
         "method": "GET",
         "mode": "cors"
-    });
-};
-exports.getGuild = getGuild;
+    })
+}
+
 ///////////////////////////////////////////////////////////////////////
 // User Requests
+
 /**
  * @function discord.getCurrentUserInGuild
- *
+ * 
  * @param {object} props
  * @param {string} props.authToken The user authorization token
  * @param {string} props.guildId The Discord server ID
  */
-const getCurrentUserInGuild = (props) => {
+export const getCurrentUserInGuild = (props: { authToken: string, guildId: string }) => {
     return fetch(`https://discord.com/api/v9/users/@me/guilds/${props.guildId}/member`, {
         "headers": {
             "accept": "*/*",
@@ -206,17 +207,17 @@ const getCurrentUserInGuild = (props) => {
         "body": null,
         "method": "GET",
         "mode": "cors"
-    });
-};
-exports.getCurrentUserInGuild = getCurrentUserInGuild;
+    })
+}
+
 /**
  * @function discord.updateUserSettings
- *
+ * 
  * @param {object} props
  * @param {string} props.authToken The user authorization token
  * @param {string} props.body The request body
  */
-const updateUserSettings = (props) => {
+export const updateUserSettings = (props: { authToken: string, body: string }) => {
     return fetch("https://discord.com/api/v9/users/@me/settings", {
         "headers": {
             "accept": "*/*",
@@ -233,16 +234,16 @@ const updateUserSettings = (props) => {
         "body": props.body,
         "method": "PATCH",
         "mode": "cors"
-    });
-};
-exports.updateUserSettings = updateUserSettings;
+    })
+}
+
 /**
  * @function discord.getUserGuilds
- *
+ * 
  * @param {object} props
  * @param {string} props.authToken The user authorization token
  */
-const getUserGuilds = (props) => {
+export const getUserGuilds = (props: { authToken: string }) => {
     return fetch("https://discord.com/api/v9/users/@me/guilds", {
         "headers": {
             "accept": "*/*",
@@ -259,16 +260,16 @@ const getUserGuilds = (props) => {
         "body": null,
         "method": "GET",
         "mode": "cors"
-    });
-};
-exports.getUserGuilds = getUserGuilds;
+    })
+}
+
 /**
  * @function discord.getMe
- *
+ * 
  * @param {object} props
  * @param {string} props.authToken The user authorization token
  */
-const getMe = (props) => {
+export const getMe = (props: { authToken: string }) => {
     return fetch("https://discord.com/api/v9/users/@me", {
         "headers": {
             "accept": "*/*",
@@ -285,19 +286,22 @@ const getMe = (props) => {
         "body": null,
         "method": "GET",
         "mode": "cors"
-    });
-};
-exports.getMe = getMe;
+    })
+}
+
 ///////////////////////////////////////////////////////////////////////
-exports.default = {
-    sendMessage: exports.sendMessage,
-    deleteMessage: exports.deleteMessage,
-    getMessages: exports.getMessages,
-    getMessage: exports.getMessage,
-    getChannels: exports.getChannels,
-    getGuild: exports.getGuild,
-    getCurrentUserInGuild: exports.getCurrentUserInGuild,
-    updateUserSettings: exports.updateUserSettings,
-    getUserGuilds: exports.getUserGuilds,
-    getMe: exports.getMe
-};
+
+export default {
+    sendMessage,
+    deleteMessage,
+    getMessages,
+    getMessage,
+
+    getChannels,
+    getGuild,
+
+    getCurrentUserInGuild,
+    updateUserSettings,
+    getUserGuilds,
+    getMe
+}
