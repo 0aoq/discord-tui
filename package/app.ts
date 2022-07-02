@@ -256,6 +256,14 @@ const renderMessage = (line: string) => {
 
     const message = JSON.parse(meta)
 
+    // render special tag
+    if (config.custom_user_options[message.author.id] && config.custom_user_options[message.author.id].tag) {
+        const tagName = config.custom_user_options[message.author.id].tag.name
+        const tagColor = config.custom_user_options[message.author.id].tag.color
+
+        if (tagName && tagColor) content = ` {${tagColor}-fg}[${tagName}]{/${tagColor}-fg}${content.slice(1)}`
+    }
+
     // render attachment (link)
     if (message.content === '' && message.attachments && message.attachments[0]) {
         // if there is no text, but there is an attachment ... show that
@@ -286,14 +294,6 @@ const renderMessage = (line: string) => {
 
         app.render()
     } else content = ` ${content}`
-
-    // render special tag
-    if (config.custom_user_options[message.author.id] && config.custom_user_options[message.author.id].tag) {
-        const tagName = config.custom_user_options[message.author.id].tag.name
-        const tagColor = config.custom_user_options[message.author.id].tag.color
-
-        if (tagName && tagColor) content = `  {${tagColor}-fg}[${tagName}]{/${tagColor}-fg}${content.slice(1)}`
-    }
 
     // render source message
     if (!content.startsWith(' ') && !content.startsWith('{gray-fg}└')) content = ` ${content}`
