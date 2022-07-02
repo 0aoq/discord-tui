@@ -111,6 +111,8 @@ export const getMessages = (props: { channelId: string, authToken: string, limit
  * @param {string} props.channelId The Discord channel ID
  * @param {string} props.messageId The Discord message ID
  * @param {string} props.authToken The user authorization token
+ * 
+ * @deprecated Use getMessages with limit of 1 instead to get most recent message
  */
 export const getMessage = (props: { channelId: string, messageId: string, authToken: string }) => {
     httpLog.push(`https://discord.com/api/v9/channels/${props.channelId}/messages/${props.messageId}`)

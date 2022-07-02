@@ -10,7 +10,7 @@ Primary function is found in `package/app.js`
 
 ## Planned
 
-- Ability to reply to messages
+- ~~Ability to reply to messages~~
 - Ability to edit messages
 - Basic user profile settings
 - Guild member list

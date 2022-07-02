@@ -241,6 +241,7 @@ let me;
 // functions
 let selectedLines = []
 let allMessages = {}
+let replyMessage = null
 
 /**
  * @function renderMessage
@@ -308,7 +309,7 @@ const renderMessage = (line: string) => {
         if (selectedLines.includes(item)) {
             item.style.bg = 'white'
             item.style.fg = 'black'
-            item.setHover('Message selected:\nShift+D - Delete\nShift+E - Edit\nShift+F - View Full')
+            item.setHover('Message selected:\n\nShift+D - Delete\nShift+E - Edit\nShift+F - View Full\nShift+R - Reply')
 
             // unselect all others
             for (let _item of selectedLines) {
@@ -369,6 +370,27 @@ const renderMessage = (line: string) => {
         currentChannelId = "0" // prevent app from reloading messages
         app.render()
     })
+
+    // reply to message
+    app.key('S-r', () => {
+        if (!selectedLines.includes(item)) return
+
+        replyMessage = {
+            message_id: message.id
+        }
+
+        messageStream.setContent('')
+        item.removeHover()
+        messageStream.clearItems()
+
+        messageStream.setContent(`{center}{gray-fg}Replying to messagex{/gray-fg}{/center}
+
+${content.replaceAll(' [\\n] ', '\n')}
+
+{center}{gray-fg}End of message ⎯  Re-open channel to {bold}cancel{/bold}{/gray-fg}{/center}`)
+
+        app.render()
+    })
 }
 
 /**
@@ -405,6 +427,7 @@ export const setChannelId = (id) => { currentChannelId = id }
  */
 const renderChannelMessages = async (channelId: string, limit = 100) => {
     messageStream.clearItems()
+    replyMessage = null
 
     if (!READY) {
         messageStream.addItem(`{center}--- CANNOT RENDER UNTIL CONNECTED TO SERVER ---{/center}`)
@@ -454,6 +477,7 @@ let categories = {}
  */
 const renderGuildChannels = async (props: { guildId: string, userPermission: string, importantRoles: Array<object> }) => {
     channels.clearItems()
+    categories = {}
 
     const request = await discord.getChannels({
         authToken: config.authToken,
@@ -636,7 +660,8 @@ messageInput.key(['C-s'], async () => {
         channelId: currentChannelId,
         authToken: config.authToken,
         body: JSON.stringify({
-            content: value
+            content: value,
+            message_reference: replyMessage
         })
     })
 
@@ -645,6 +670,7 @@ messageInput.key(['C-s'], async () => {
     // clear input
     messageInput.cancel()
     messageInput.clearValue()
+    replyMessage = null
     app.render()
 })
 
@@ -776,7 +802,7 @@ export const loadSocketConnection = () => {
             // get our session id
             if (data.op === 10) { // Discord "Hello" message
                 // wait heartbeat_interval * jitter
-                const initial_wait = data.d.heartbeat_interval * 0.1 /* Math.random() */
+                const initial_wait = data.d.heartbeat_interval * 0.05 /* Math.random() */
 
                 socketLog.push(`identify_time: ${Math.floor(initial_wait)}ms`)
 
@@ -821,8 +847,19 @@ export const loadSocketConnection = () => {
                 if (data.t === "MESSAGE_CREATE") { // a new message!
                     // if we are currently on that channel, use this data to render a message
                     if (currentChannelId === data.d.channel_id) {
-                        // content returns blank for message and I don't know why, so just pull all messages and re-render
-                        renderChannelMessages(data.d.channel_id, 15) // we also don't need as many messages this time because we're focusing on this one section
+                        // content returns blank for message and I don't know why, so just pull the individual message
+                        if (replyMessage !== null) return
+
+                        const request = await discord.getMessages({
+                            channelId: data.d.channel_id,
+                            authToken: config.authToken,
+                            limit: 1
+                        })
+
+                        let message = await request.json()
+                        message = message[0]
+
+                        renderMessage(`[{bold}${message.author.username}{/bold}]: ${message.content.replaceAll('\n', ' [\\n] ')}!!META:${JSON.stringify(message)}\n`)
                     }
                 } else if (data.t === "MESSAGE_DELETE") {
                     if (currentChannelId === data.d.channel_id) {
